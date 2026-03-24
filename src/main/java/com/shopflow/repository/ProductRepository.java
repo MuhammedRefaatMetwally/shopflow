@@ -6,28 +6,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    List<Product> findByCategoryId(Long categoryId);
+    List<Product> findByActiveTrue();
 
-    List<Product> findByNameContainingIgnoreCase(String name);
+    List<Product> findByCategoryIdAndActiveTrue(Long categoryId);
 
-    // Custom JPQL query — for complex filtering
+    Optional<Product> findByIdAndActiveTrue(Long id);
+
     @Query("""
         SELECT p FROM Product p
-        WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND (:categoryId IS NULL OR p.category.id = :categoryId)
-        AND (:minPrice IS NULL OR p.price >= :minPrice)
-        AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+        WHERE p.active = true
+        AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
     """)
-    List<Product> searchProducts(
-            @Param("name") String name,
-            @Param("categoryId") Long categoryId,
-            @Param("minPrice") BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice
-    );
+    List<Product> searchByName(@Param("name") String name);
 }

@@ -41,8 +41,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Order> orders;
 
-    // UserDetails interface methods — Spring Security needs these
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -50,7 +51,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // we use email as the username
+        return email;
     }
 
     @Override
