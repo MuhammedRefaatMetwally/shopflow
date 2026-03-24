@@ -41,8 +41,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Cart cart;
 
     // UserDetails interface methods — Spring Security needs these
     @Override
