@@ -100,8 +100,7 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    // Private mapping method — converts entity to DTO
-    // Private because nothing outside this service needs it
+
     private ProductResponse mapToResponse(Product product) {
         return ProductResponse.builder()
                 .id(product.getId())

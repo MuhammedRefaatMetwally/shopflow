@@ -34,7 +34,6 @@ public class OrderService {
     @Transactional
     public OrderResponse placeOrder(PlaceOrderRequest request, String userEmail) {
 
-        // Load the user placing the order
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found"
@@ -43,7 +42,6 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
-        // Process each item in the order
         for (OrderItemRequest itemRequest : request.getItems()) {
 
             Product product = productRepository
@@ -53,7 +51,6 @@ public class OrderService {
                                     + itemRequest.getProductId()
                     ));
 
-            // Check stock — can't sell what you don't have
             if (product.getStockQuantity() < itemRequest.getQuantity()) {
                 throw new InsufficientStockException(
                         "Insufficient stock for product: " + product.getName()
@@ -62,13 +59,11 @@ public class OrderService {
                 );
             }
 
-            // Reduce stock
             product.setStockQuantity(
                     product.getStockQuantity() - itemRequest.getQuantity()
             );
             productRepository.save(product);
 
-            // Snapshot the price at the time of purchase
             BigDecimal itemTotal = product.getPrice()
                     .multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
@@ -82,7 +77,6 @@ public class OrderService {
             orderItems.add(orderItem);
         }
 
-        // Build the order
         Order order = Order.builder()
                 .user(user)
                 .items(orderItems)
@@ -91,8 +85,6 @@ public class OrderService {
                 .shippingAddress(request.getShippingAddress())
                 .build();
 
-        // Wire each item back to the order
-        // (needed for the JPA relationship to save correctly)
         orderItems.forEach(item -> item.setOrder(order));
 
         return mapToResponse(orderRepository.save(order));

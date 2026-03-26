@@ -25,14 +25,12 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
 
-        // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException(
                     "Email already registered: " + request.getEmail()
             );
         }
 
-        // Build the user — password is hashed before saving
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -43,7 +41,6 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // Generate token immediately so user is logged in after registering
         String token = jwtService.generateToken(user);
 
         return AuthResponse.builder()
@@ -55,9 +52,6 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
 
-        // This does two things: verifies email exists AND password matches
-        // If either is wrong it throws BadCredentialsException automatically
-        // which our GlobalExceptionHandler catches and returns 401
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -65,7 +59,6 @@ public class AuthService {
                 )
         );
 
-        // If we reach here, credentials were valid — load the user
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow();
 
