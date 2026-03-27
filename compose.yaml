@@ -1,15 +1,31 @@
 services:
   postgres:
-    image: 'postgres:16'
+    image: postgres:16
     container_name: shopflow-postgres
     environment:
-      - POSTGRES_DB=shopflow
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_DB: shopflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - shopflow-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-volumes:
-  shopflow-data:
+  app:
+    build: .
+    container_name: shopflow-app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shopflow
+    depends_on:
+      postgres:
+        condition: service_healthy
