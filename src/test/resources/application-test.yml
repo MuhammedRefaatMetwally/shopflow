@@ -11,3 +11,10 @@ spring:
   docker:
     compose:
       enabled: false
+
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
